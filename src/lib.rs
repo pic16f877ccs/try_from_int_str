@@ -1,5 +1,4 @@
 #![forbid(unsafe_code)]
-#![no_std]
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(rustdoc::broken_intra_doc_links)]
@@ -13,29 +12,73 @@
 //! assert_eq!(<u32>::try_from_int_str("2023"), Ok(2023u32));
 //! assert_eq!(<u64>::try_from_int_str(<u64>::MAX as u128), Ok(u64::MAX));
 //! ```
-use core::convert::Infallible;
+use core::fmt::{self, Display};
 use core::num::ParseIntError;
 use core::num::TryFromIntError;
+use core::str::FromStr;
+use std::error;
+
+/// An error which can be returned when parsing an integer or string.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TryFromIntStrErr {
+    int_str_error: IntStrError,
+}
+
+impl Display for TryFromIntStrErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self.int_str_error {
+            IntStrError::ErrorStr(parse_int_error) => {
+                write!(f, "{}", parse_int_error.to_string())
+            }
+            IntStrError::ErrorInt(try_from_int_error) => {
+                write!(f, "{}", try_from_int_error.to_string())
+            }
+        }
+    }
+}
+
+impl From<ParseIntError> for TryFromIntStrErr {
+    fn from(err: ParseIntError) -> Self {
+        Self {
+            int_str_error: IntStrError::ErrorStr(err),
+        }
+    }
+}
+
+impl From<TryFromIntError> for TryFromIntStrErr {
+    fn from(err: TryFromIntError) -> Self {
+        Self {
+            int_str_error: IntStrError::ErrorInt(err),
+        }
+    }
+}
+
+impl error::Error for TryFromIntStrErr {}
+
+/// Enum to store the various types of errors that can cause parsing an integer or string to fail.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IntStrError {
+    /// Core library [`ParseIntError`] structure.
+    ErrorStr(ParseIntError),
+    /// Core library [`TryFromIntError`] structure.
+    ErrorInt(TryFromIntError),
+}
 
 /// A generic trait for converting from str or integer to type integer.
 pub trait TryFromIntStr<T>: Sized {
-    /// The type returned in the event of a conversion error.
-    type IntStrErr;
-
     /// Conversion from str or integer to type integer.
-    fn try_from_int_str(var: T) -> Result<Self, Self::IntStrErr>;
+    fn try_from_int_str(var: T) -> Result<Self, TryFromIntStrErr>;
 }
 
 macro_rules! try_from_int {
     ( $into_type:ty; $($from_type:ty),+ ) => {
         $(
             impl TryFromIntStr<$from_type> for $into_type {
-                type IntStrErr = Infallible;
 
                 #[doc = concat!("Converts ", stringify!($from_type), " to ", stringify!($into_type), " losslessly.")]
                 #[inline]
-                fn try_from_int_str(var: $from_type) -> Result<Self, Self::IntStrErr> {
-                        Ok(var as Self)
+                fn try_from_int_str(var: $from_type) -> Result<Self, TryFromIntStrErr> {
+                    Ok(var as Self)
                 }
             }
         )+
@@ -56,26 +99,21 @@ try_from_int! { u128; u8, u16, u32, u64, usize }
 macro_rules! try_from_int_into {
     ( $into_type:ty; $($from_type:ty),+ ) => {
         impl TryFromIntStr<$into_type> for $into_type {
-            type IntStrErr = Infallible;
 
             #[doc = concat!("Converts ", stringify!($into_type), " to ", stringify!($into_type), " losslessly.")]
             #[inline]
-            fn try_from_int_str(var: Self) -> Result<Self, Self::IntStrErr> {
+            fn try_from_int_str(var: Self) -> Result<Self, TryFromIntStrErr> {
                 Ok(var)
             }
         }
 
         $(
             impl TryFromIntStr<$from_type> for $into_type {
-                type IntStrErr = TryFromIntError;
 
                 #[doc = concat!("Converts ", stringify!($from_type), " to ", stringify!($into_type), ". Conversion can fail.")]
                 #[inline]
-                fn try_from_int_str(var: $from_type) -> Result<Self, Self::IntStrErr> {
-                    match var.try_into() {
-                        Ok(ok) => Ok(ok),
-                        Err(err) => Err(err.into()),
-                    }
+                fn try_from_int_str(var: $from_type) -> Result<Self, TryFromIntStrErr> {
+                    <Self>::try_from(var).map_err(|err| TryFromIntStrErr { int_str_error: IntStrError::ErrorInt(err.into()) } )
                 }
             }
         )+
@@ -99,15 +137,11 @@ macro_rules! try_from_str {
     ( $($into_type:ty),+ ) => {
         $(
             impl TryFromIntStr<&str> for $into_type {
-                type IntStrErr = ParseIntError;
 
                 #[doc = concat!("Converts &str to ", stringify!($into_type), ". Conversion can fail.")]
                 #[inline]
-                fn try_from_int_str(var: &str) -> Result<Self, Self::IntStrErr> {
-                    match var.parse() {
-                        Ok(ok) => Ok(ok),
-                        Err(err) => Err(err),
-                    }
+                fn try_from_int_str(var: &str) -> Result<Self, TryFromIntStrErr> {
+                    FromStr::from_str(var).map_err(|err| TryFromIntStrErr{ int_str_error: IntStrError::ErrorStr(err) } )
                 }
             }
         )+

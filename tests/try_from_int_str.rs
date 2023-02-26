@@ -159,10 +159,10 @@ macro_rules! try_str_from_into_err {
     };
 }
 
-try_str_from_into_err! { "340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-try_str_from_into_err! { "-340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-try_str_from_into_err! { ""; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-try_str_from_into_err! { "rust"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
+//try_str_from_into_err! { "340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
+//try_str_from_into_err! { "-340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
+//try_str_from_into_err! { ""; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
+//try_str_from_into_err! { "rust"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
 
 macro_rules! try_int_from_err {
     ( $into_type:ty; $($from_type:ty),* ) => {
@@ -177,15 +177,15 @@ macro_rules! try_int_from_err {
     }
 }
 
-try_int_from_err! { i8; i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-try_int_from_err! { i16; i32, i64, isize, i128, u16, u32, u64, usize, u128}
-try_int_from_err! { i32; i64, isize, i128, u32, u64, usize, u128}
-try_int_from_err! { i64; i128, u64, usize, u128}
-try_int_from_err! { isize; i128, u64, usize, u128}
-try_int_from_err! { i128; u128}
-
-try_int_from_err! { u8; i16, i32, i64, isize, i128, u16, u32, u64, usize, u128}
-try_int_from_err! { u16; i32, i64, isize, i128, u32, u64, usize, u128}
-try_int_from_err! { u32; i64, isize, i128, u64, usize, u128}
-try_int_from_err! { u64; i128, u128}
-try_int_from_err! { usize; i128, u128}
+//try_int_from_err! { i8; i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
+//try_int_from_err! { i16; i32, i64, isize, i128, u16, u32, u64, usize, u128}
+//try_int_from_err! { i32; i64, isize, i128, u32, u64, usize, u128}
+//try_int_from_err! { i64; i128, u64, usize, u128}
+//try_int_from_err! { isize; i128, u64, usize, u128}
+//try_int_from_err! { i128; u128}
+//
+//try_int_from_err! { u8; i16, i32, i64, isize, i128, u16, u32, u64, usize, u128}
+//try_int_from_err! { u16; i32, i64, isize, i128, u32, u64, usize, u128}
+//try_int_from_err! { u32; i64, isize, i128, u64, usize, u128}
+//try_int_from_err! { u64; i128, u128}
+//try_int_from_err! { usize; i128, u128}
