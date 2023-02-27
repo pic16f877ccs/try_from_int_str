@@ -133,25 +133,26 @@ macro_rules! try_str_from_into {
     };
 }
 
-try_str_from_into! { "-128", "127"; i8, i16, i32, i64, isize, i128; u8, u16, u32, u64, usize, u128; i8}
-try_str_from_into! { "0", "255"; i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128; ; u8}
-try_str_from_into! { "-32768", "32767"; i16, i32, i64, isize, i128; u16, u32, u64, usize, u128; i16}
-try_str_from_into! { "0", "65535"; u16, i32, u32, i64, u64, isize, usize, i128, u128; ; u16}
-try_str_from_into! { "-2147483648", "2147483647"; i32, i64, isize, i128; u32, u64, usize, u128; i32}
-try_str_from_into! { "0", "4294967295"; i64, u64, isize, usize, i128, u128; ; u32}
-try_str_from_into! { "-9223372036854775808", "9223372036854775807"; i64, isize, i128; u64, usize, u128; i64}
-try_str_from_into! { "-9223372036854775808", "9223372036854775807"; i64, isize, i128; u64, usize, u128; isize}
-try_str_from_into! { "0", "18446744073709551615"; u64, usize, i128, u128; ; u64}
-try_str_from_into! { "0", "18446744073709551615"; u64, usize, i128, u128; ; usize}
-try_str_from_into! { "-170141183460469231731687303715884105728", "170141183460469231731687303715884105727"; i128; u128; i128}
-try_str_from_into! { "0", "340282366920938463463374607431768211455"; u128; ; u128}
+try_str_from_into! { "-128", "127"; i8, i16, i32, i64, isize, i128; u8, u16, u32, u64, usize, u128; i8 }
+try_str_from_into! { "0", "255"; i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128; ; u8 }
+try_str_from_into! { "-32768", "32767"; i16, i32, i64, isize, i128; u16, u32, u64, usize, u128; i16 }
+try_str_from_into! { "0", "65535"; u16, i32, u32, i64, u64, isize, usize, i128, u128; ; u16 }
+try_str_from_into! { "-2147483648", "2147483647"; i32, i64, isize, i128; u32, u64, usize, u128; i32 }
+try_str_from_into! { "0", "4294967295"; i64, u64, isize, usize, i128, u128; ; u32 }
+try_str_from_into! { "-9223372036854775808", "9223372036854775807"; i64, isize, i128; u64, usize, u128; i64 }
+try_str_from_into! { "-9223372036854775808", "9223372036854775807"; i64, isize, i128; u64, usize, u128; isize }
+try_str_from_into! { "0", "18446744073709551615"; u64, usize, i128, u128; ; u64 }
+try_str_from_into! { "0", "18446744073709551615"; u64, usize, i128, u128; ; usize }
+try_str_from_into! { "-170141183460469231731687303715884105728", "170141183460469231731687303715884105727"; i128; u128; i128 }
+try_str_from_into! { "0", "340282366920938463463374607431768211455"; u128; ; u128 }
 
 macro_rules! try_str_from_into_err {
     ( $from_str:expr; $($into_type:ty),* )=> {
         $( paste! {
                 #[test]
                 fn [<$into_type _try_from_str_$from_str _err>]() {
-                   assert_eq!(<$into_type>::try_from_int_str($from_str), $from_str.parse::<$into_type>());
+                   assert_eq!(<$into_type>::try_from_int_str($from_str).unwrap_err().to_string(),
+                   $from_str.parse::<$into_type>().unwrap_err().to_string());
                 }
             }
         )*
@@ -159,10 +160,10 @@ macro_rules! try_str_from_into_err {
     };
 }
 
-//try_str_from_into_err! { "340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-//try_str_from_into_err! { "-340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-//try_str_from_into_err! { ""; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-//try_str_from_into_err! { "rust"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
+try_str_from_into_err! { "340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128 }
+try_str_from_into_err! { "-340282366920938463463374607431768211456"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128 }
+try_str_from_into_err! { ""; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128 }
+try_str_from_into_err! { "rust"; i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128 }
 
 macro_rules! try_int_from_err {
     ( $into_type:ty; $($from_type:ty),* ) => {
@@ -170,22 +171,23 @@ macro_rules! try_int_from_err {
             paste! {
                 #[test]
                 fn [<$into_type _try_from_int_str_$from_type _err>]() {
-                    assert_eq!(<$into_type>::try_from_int_str((<$into_type>::MAX as $from_type) + 1), <$into_type>::try_from((<$into_type>::MAX as $from_type) + 1))
+                    assert_eq!(<$into_type>::try_from_int_str((<$into_type>::MAX as $from_type) + 1).unwrap_err().to_string(),
+                    <$into_type>::try_from((<$into_type>::MAX as $from_type) + 1).unwrap_err().to_string())
                 }
             }
         )*
     }
 }
 
-//try_int_from_err! { i8; i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128}
-//try_int_from_err! { i16; i32, i64, isize, i128, u16, u32, u64, usize, u128}
-//try_int_from_err! { i32; i64, isize, i128, u32, u64, usize, u128}
-//try_int_from_err! { i64; i128, u64, usize, u128}
-//try_int_from_err! { isize; i128, u64, usize, u128}
-//try_int_from_err! { i128; u128}
-//
-//try_int_from_err! { u8; i16, i32, i64, isize, i128, u16, u32, u64, usize, u128}
-//try_int_from_err! { u16; i32, i64, isize, i128, u32, u64, usize, u128}
-//try_int_from_err! { u32; i64, isize, i128, u64, usize, u128}
-//try_int_from_err! { u64; i128, u128}
-//try_int_from_err! { usize; i128, u128}
+try_int_from_err! { i8; i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128 }
+try_int_from_err! { i16; i32, i64, isize, i128, u16, u32, u64, usize, u128 }
+try_int_from_err! { i32; i64, isize, i128, u32, u64, usize, u128 }
+try_int_from_err! { i64; i128, u64, usize, u128 }
+try_int_from_err! { isize; i128, u64, usize, u128 }
+try_int_from_err! { i128; u128 }
+
+try_int_from_err! { u8; i16, i32, i64, isize, i128, u16, u32, u64, usize, u128 }
+try_int_from_err! { u16; i32, i64, isize, i128, u32, u64, usize, u128 }
+try_int_from_err! { u32; i64, isize, i128, u64, usize, u128 }
+try_int_from_err! { u64; i128, u128 }
+try_int_from_err! { usize; i128, u128 }

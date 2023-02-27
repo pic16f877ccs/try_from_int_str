@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#![no_std]
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(rustdoc::broken_intra_doc_links)]
@@ -11,12 +12,13 @@
 //! # use try_from_int_str::TryFromIntStr;
 //! assert_eq!(<u32>::try_from_int_str("2023"), Ok(2023u32));
 //! assert_eq!(<u64>::try_from_int_str(<u64>::MAX as u128), Ok(u64::MAX));
+//! assert_eq!(<u64>::try_from_int_str(u128::MAX).unwrap_err().to_string(),
+//! "out of range integral type conversion attempted");
 //! ```
 use core::fmt::{self, Display};
 use core::num::ParseIntError;
 use core::num::TryFromIntError;
 use core::str::FromStr;
-use std::error;
 
 /// An error which can be returned when parsing an integer or string.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -28,10 +30,10 @@ impl Display for TryFromIntStrErr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.int_str_error {
             IntStrError::ErrorStr(parse_int_error) => {
-                write!(f, "{}", parse_int_error.to_string())
+                write!(f, "{parse_int_error}")
             }
             IntStrError::ErrorInt(try_from_int_error) => {
-                write!(f, "{}", try_from_int_error.to_string())
+                write!(f, "{try_from_int_error}")
             }
         }
     }
@@ -52,8 +54,6 @@ impl From<TryFromIntError> for TryFromIntStrErr {
         }
     }
 }
-
-impl error::Error for TryFromIntStrErr {}
 
 /// Enum to store the various types of errors that can cause parsing an integer or string to fail.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -78,7 +78,8 @@ macro_rules! try_from_int {
                 #[doc = concat!("Converts ", stringify!($from_type), " to ", stringify!($into_type), " losslessly.")]
                 #[inline]
                 fn try_from_int_str(var: $from_type) -> Result<Self, TryFromIntStrErr> {
-                    Ok(var as Self)
+                    //Ok(var as Self)
+                    Ok(var as Self).map_err(|err| TryFromIntStrErr { int_str_error: IntStrError::ErrorInt(err) } )
                 }
             }
         )+
@@ -103,7 +104,8 @@ macro_rules! try_from_int_into {
             #[doc = concat!("Converts ", stringify!($into_type), " to ", stringify!($into_type), " losslessly.")]
             #[inline]
             fn try_from_int_str(var: Self) -> Result<Self, TryFromIntStrErr> {
-                Ok(var)
+                //Ok(var)
+                Ok(var).map_err(|err| TryFromIntStrErr { int_str_error: IntStrError::ErrorInt(err) } )
             }
         }
 
