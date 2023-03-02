@@ -39,6 +39,13 @@ impl Display for TryFromIntStrErr {
     }
 }
 
+impl TryFromIntStrErr {
+    /// Returns the enum error variant when converting a integer or string.
+    pub fn multi_err(&self) -> &IntStrError {
+        &self.int_str_error
+    }
+}
+
 impl From<ParseIntError> for TryFromIntStrErr {
     fn from(err: ParseIntError) -> Self {
         Self {
