@@ -17,6 +17,8 @@
 //! assert_eq!(<u64>::try_from_int_str(u128::MAX).unwrap_err().to_string(),
 //! "out of range integral type conversion attempted");
 //! ```
+#[doc = include_str!("../README.md")]
+
 use core::fmt::{self, Display};
 use core::num::ParseIntError;
 use core::num::TryFromIntError;
