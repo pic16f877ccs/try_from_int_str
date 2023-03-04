@@ -10,7 +10,9 @@
 //!
 //! ```
 //! # use try_from_int_str::TryFromIntStr;
+//! assert_eq!(<u32>::try_from_int_str(true), Ok(1u32));
 //! assert_eq!(<u32>::try_from_int_str("2023"), Ok(2023u32));
+//! assert!(<u8>::try_from_int_str("2023").is_err());
 //! assert_eq!(<u64>::try_from_int_str(<u64>::MAX as u128), Ok(u64::MAX));
 //! assert_eq!(<u64>::try_from_int_str(u128::MAX).unwrap_err().to_string(),
 //! "out of range integral type conversion attempted");
@@ -26,6 +28,13 @@ pub struct TryFromIntStrErr {
     int_str_error: IntStrError,
 }
 
+impl TryFromIntStrErr {
+    /// Returns the enum error variant when converting a integer or string.
+    pub fn multi_err(&self) -> &IntStrError {
+        &self.int_str_error
+    }
+}
+
 impl Display for TryFromIntStrErr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.int_str_error {
@@ -36,13 +45,6 @@ impl Display for TryFromIntStrErr {
                 write!(f, "{try_from_int_error}")
             }
         }
-    }
-}
-
-impl TryFromIntStrErr {
-    /// Returns the enum error variant when converting a integer or string.
-    pub fn multi_err(&self) -> &IntStrError {
-        &self.int_str_error
     }
 }
 
@@ -158,3 +160,20 @@ macro_rules! try_from_str {
 }
 
 try_from_str! { i8, u8, i16, u16, i32, u32, i64, u64, isize, usize, i128, u128 }
+
+macro_rules! try_from_bool {
+    ( $($into_type:ty),+ ) => {
+        $(
+            impl TryFromIntStr<bool> for $into_type {
+
+                #[doc = concat!("Converts bool to ", stringify!($into_type), " losslessly.")]
+                #[inline]
+                fn try_from_int_str(var: bool) -> Result<Self, TryFromIntStrErr> {
+                    Ok(var as Self)
+                }
+            }
+        )+
+    }
+}
+
+try_from_bool! { i8, u8, i16, u16, i32, u32, i64, u64, isize, usize, i128, u128 }

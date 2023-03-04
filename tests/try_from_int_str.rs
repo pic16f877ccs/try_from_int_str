@@ -191,3 +191,22 @@ try_int_from_err! { u16; i32, i64, isize, i128, u32, u64, usize, u128 }
 try_int_from_err! { u32; i64, isize, i128, u64, usize, u128 }
 try_int_from_err! { u64; i128, u128 }
 try_int_from_err! { usize; i128, u128 }
+
+macro_rules! try_bool_into_from {
+    ( $($into_type:ty),* )=> {
+        $( paste! {
+                #[test]
+                fn [<$into_type _try_from_false>]() {
+                   assert_eq!(<$into_type>::try_from_int_str(false), Ok(0));
+                }
+
+                #[test]
+                fn [<$into_type _try_from_true>]() {
+                   assert_eq!(<$into_type>::try_from_int_str(true), Ok(1));
+                }
+            }
+        )*
+    }
+}
+
+try_bool_into_from! { i8, i16, i32, i64, isize, i128, u8, u16, u32, u64, usize, u128 }
