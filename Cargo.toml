@@ -8,5 +8,5 @@ repository = "https://github.com/pic16f877ccs/try_from_int_str"
 homepage = "https://github.com/pic16f877ccs/try_from_int_str"
 license = "GPL-3.0-or-later"
 
-[dependencies]
+[dev-dependencies]
 paste = "1.0.11"

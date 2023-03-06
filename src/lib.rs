@@ -18,7 +18,6 @@
 //! "out of range integral type conversion attempted");
 //! ```
 #[doc = include_str!("../README.md")]
-
 use core::fmt::{self, Display};
 use core::num::ParseIntError;
 use core::num::TryFromIntError;
@@ -89,7 +88,6 @@ macro_rules! try_from_int {
                 #[doc = concat!("Converts ", stringify!($from_type), " to ", stringify!($into_type), " losslessly.")]
                 #[inline]
                 fn try_from_int_str(var: $from_type) -> Result<Self, TryFromIntStrErr> {
-                    //Ok(var as Self)
                     Ok(var as Self).map_err(|err| TryFromIntStrErr { int_str_error: IntStrError::ErrorInt(err) } )
                 }
             }
@@ -115,7 +113,6 @@ macro_rules! try_from_int_into {
             #[doc = concat!("Converts ", stringify!($into_type), " to ", stringify!($into_type), " losslessly.")]
             #[inline]
             fn try_from_int_str(var: Self) -> Result<Self, TryFromIntStrErr> {
-                //Ok(var)
                 Ok(var).map_err(|err| TryFromIntStrErr { int_str_error: IntStrError::ErrorInt(err) } )
             }
         }
