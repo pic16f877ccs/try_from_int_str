@@ -17,8 +17,9 @@ cargo add try_from_int_str --git "https://github.com/pic16f877ccs/try_from_int_s
 #### Examples
 Usage:
 
-```
-# use try_from_int_str::TryFromIntStr; 
+```rust
+use try_from_int_str::TryFromIntStr;
+
 assert_eq!(<u32>::try_from_int_str(true), Ok(1u32));
 assert_eq!(<u32>::try_from_int_str("2023"), Ok(2023u32));
 assert!(<u8>::try_from_int_str("2023").is_err());
