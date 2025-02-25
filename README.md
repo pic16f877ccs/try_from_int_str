@@ -29,4 +29,4 @@ assert_eq!(<u64>::try_from_int_str(u128::MAX).unwrap_err().to_string(),
 ```
 
 ## License
-GNU General Public License v3.0
+MIT license
